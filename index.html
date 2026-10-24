@@ -1,0 +1,93 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="Orbit task manager capstone demo with simulated sign-in, CRUD tasks, search, filters, and persistent browser storage.">
+  <title>Orbit — Project Workspace</title>
+  <link rel="stylesheet" href="style.css">
+  <script type="module" src="app.js"></script>
+</head>
+<body>
+  <a class="skip-link" href="#main">Skip to main content</a>
+  <div id="auth-screen" class="auth-screen">
+    <form id="login-form" class="auth-card">
+      <div class="logo"><span class="logo-icon">O</span> orbit</div>
+      <p class="eyebrow">YOUR WORKSPACE, IN FOCUS</p>
+      <h1>Welcome back</h1>
+      <p class="muted">Sign in to your local demo workspace.</p>
+      <label for="name-input">Your name</label>
+      <input id="name-input" name="name" autocomplete="name" placeholder="e.g. Alex Morgan" required minlength="2">
+      <label for="email-input">Email address</label>
+      <input id="email-input" name="email" type="email" autocomplete="email" placeholder="you@example.com" required>
+      <p class="helper">Demo authentication only — no password or account is sent to a server.</p>
+      <button class="button primary full" type="submit">Enter workspace <span aria-hidden="true">→</span></button>
+    </form>
+  </div>
+
+  <div id="app-shell" class="app-shell" hidden>
+    <aside class="sidebar" aria-label="Main navigation">
+      <a class="logo" href="#" aria-label="Orbit dashboard"><span class="logo-icon">O</span> orbit</a>
+      <p class="nav-label">WORKSPACE</p>
+      <button class="nav-item active" type="button" data-view="all"><span>▦</span> All tasks <span class="nav-count" id="all-count">0</span></button>
+      <button class="nav-item" type="button" data-view="today"><span>◷</span> Due today</button>
+      <button class="nav-item" type="button" data-view="completed"><span>✓</span> Completed</button>
+      <div class="sidebar-bottom">
+        <div class="profile-avatar" id="profile-avatar">A</div>
+        <div class="profile-info"><strong id="profile-name">Alex Morgan</strong><span id="profile-email">alex@example.com</span></div>
+        <button class="icon-button" id="logout-button" type="button" aria-label="Sign out" title="Sign out">↪</button>
+      </div>
+    </aside>
+
+    <main id="main" class="main-content">
+      <header class="page-header">
+        <div><p class="eyebrow">PROJECT WORKSPACE</p><h1 id="greeting">Good day 👋</h1><p class="muted">A little progress each day adds up.</p></div>
+        <button class="button primary" id="new-task-button" type="button"><span aria-hidden="true">＋</span> New task</button>
+      </header>
+
+      <section class="stats-grid" aria-label="Task summary">
+        <article class="stat-card"><span class="stat-label">Total tasks</span><strong id="stat-total">0</strong><span class="stat-foot">Across your workspace</span></article>
+        <article class="stat-card"><span class="stat-label">In progress</span><strong id="stat-progress">0</strong><span class="stat-foot"><span class="dot purple"></span> Active work</span></article>
+        <article class="stat-card"><span class="stat-label">Completed</span><strong id="stat-completed">0</strong><span class="stat-foot"><span class="dot green"></span> Nice work</span></article>
+        <article class="stat-card"><span class="stat-label">Completion rate</span><strong id="stat-rate">0%</strong><span class="stat-foot">Keep the momentum</span></article>
+      </section>
+
+      <section class="tasks-section" aria-labelledby="tasks-title">
+        <div class="section-heading"><div><h2 id="tasks-title">Your tasks</h2><p class="muted" id="task-summary">Manage the work that matters.</p></div></div>
+        <div class="task-controls">
+          <label class="search-box"><span aria-hidden="true">⌕</span><span class="visually-hidden">Search tasks</span><input id="task-search" type="search" placeholder="Search tasks…"></label>
+          <label class="select-label" for="priority-filter">Priority <select id="priority-filter"><option value="all">All priorities</option><option value="high">High</option><option value="medium">Medium</option><option value="low">Low</option></select></label>
+          <label class="select-label" for="status-filter">Status <select id="status-filter"><option value="all">All statuses</option><option value="todo">To do</option><option value="progress">In progress</option><option value="done">Completed</option></select></label>
+        </div>
+        <div class="table-wrap">
+          <table>
+            <thead><tr><th scope="col">Task</th><th scope="col">Priority</th><th scope="col">Due date</th><th scope="col">Status</th><th scope="col"><span class="visually-hidden">Actions</span></th></tr></thead>
+            <tbody id="task-list"></tbody>
+          </table>
+          <div id="empty-state" class="empty-state" hidden><div class="empty-icon">✓</div><h3>No tasks here yet</h3><p>Create a task or adjust your filters to get started.</p><button class="button secondary" id="empty-add-button" type="button">Create a task</button></div>
+        </div>
+      </section>
+      <footer class="footer"><span>Orbit Workspace · Capstone demo</span><span>Saved automatically in this browser</span></footer>
+    </main>
+  </div>
+
+  <dialog id="task-dialog" class="task-dialog" aria-labelledby="dialog-title">
+    <form id="task-form" method="dialog">
+      <div class="dialog-heading"><div><p class="eyebrow">TASK DETAILS</p><h2 id="dialog-title">Create a task</h2></div><button class="icon-button" id="dialog-close" type="button" aria-label="Close dialog">✕</button></div>
+      <input id="task-id" type="hidden">
+      <label for="task-title">Task name <span aria-hidden="true">*</span></label>
+      <input id="task-title" name="title" required minlength="2" maxlength="100" placeholder="e.g. Prepare project presentation">
+      <label for="task-description">Description</label>
+      <textarea id="task-description" name="description" rows="3" maxlength="400" placeholder="Add a few details…"></textarea>
+      <div class="form-row">
+        <div><label for="task-priority">Priority</label><select id="task-priority" name="priority"><option value="low">Low</option><option value="medium" selected>Medium</option><option value="high">High</option></select></div>
+        <div><label for="task-status">Status</label><select id="task-status" name="status"><option value="todo">To do</option><option value="progress">In progress</option><option value="done">Completed</option></select></div>
+      </div>
+      <label for="task-due">Due date</label><input id="task-due" name="due" type="date">
+      <p class="form-error" id="form-error" role="alert" hidden></p>
+      <div class="dialog-actions"><button class="button secondary" id="cancel-dialog" type="button">Cancel</button><button class="button primary" id="save-task-button" type="submit">Save task</button></div>
+    </form>
+  </dialog>
+  <div id="toast" class="toast" role="status" aria-live="polite"></div>
+</body>
+</html>
